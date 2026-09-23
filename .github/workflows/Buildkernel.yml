@@ -94,10 +94,11 @@ jobs:
          set -euo pipefail
          cd Buildkernel
          # Use SukiSU builtin branch tip to match susfs v2.3.0 from gki-android14-6.1 tip.
-         # The v4.1.3 manager MAY need updating if the uapi version bumped.
          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s builtin
          # Verify susfs symbols exist in this driver
          grep -qE '^config[[:space:]]+KSU_SUSFS[[:space:]]*$' KernelSU/kernel/Kconfig
+         # Set version tag for the banner
+         SUKISU_VER=$(git -C KernelSU describe --tags --always 2>/dev/null || echo "builtin")
          for f in KernelSU/kernel/Kbuild KernelSU/kernel/Makefile; do
            if [ -f "$f" ] && grep -q '^REPO_BRANCH[[:space:]]*:=' "$f"; then
              sed -i "s|^REPO_BRANCH[[:space:]]*:=.*|REPO_BRANCH := $SUKISU_VER|" "$f"; break
