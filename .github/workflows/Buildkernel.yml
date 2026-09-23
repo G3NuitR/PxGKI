@@ -113,9 +113,7 @@ jobs:
       - name: Set up susfs
         run: |
          cd Buildkernel
-         git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android${{ github.event.inputs.Android_Release }}-${{ github.event.inputs.Kernel_Version }} --no-single-branch
-         # pinned to the SUSFS generation that matches the SukiSU ref above (v2.1.0)
-         git -C susfs4ksu checkout -q --detach ee023e3 || echo "Warning: pinned commit not found, using branch tip"
+         git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android${{ github.event.inputs.Android_Release }}-${{ github.event.inputs.Kernel_Version }} --depth=1
          cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android${{ github.event.inputs.Android_Release }}-${{ github.event.inputs.Kernel_Version }}.patch ./common/
          cp susfs4ksu/kernel_patches/fs/* ./common/fs/
          cp susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
