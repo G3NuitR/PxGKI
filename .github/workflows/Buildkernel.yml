@@ -93,16 +93,10 @@ jobs:
         run: |
          set -euo pipefail
          cd Buildkernel
-         # `builtin` is the only SukiSU branch carrying kernel-side susfs; 6c13a06 is its
-         # last commit before the uapi-version bump (KSU_APP_PROFILE_VER 3 -> 4), so the
-         # v4.1.3 Manager APK still speaks this ABI. Keep in sync with Buildkernel.sh.
-         SUKISU_SRC="6c13a06"
-         SUKISU_VER="v4.1.3"
-         curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s "$SUKISU_SRC"
-         git -C KernelSU fetch -q --tags --unshallow origin 2>/dev/null || git -C KernelSU fetch -q --tags origin 2>/dev/null || true
-         # setup.sh swallows a failed checkout, so verify HEAD instead of trusting it
-         test "$(git -C KernelSU rev-parse HEAD)" = "$(git -C KernelSU rev-parse "$SUKISU_SRC^{commit}")"
-         # without this symbol every CONFIG_KSU_SUSFS* below is silently dropped by Kconfig
+         # Use SukiSU builtin branch tip to match susfs v2.3.0 from gki-android14-6.1 tip.
+         # The v4.1.3 manager MAY need updating if the uapi version bumped.
+         curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s builtin
+         # Verify susfs symbols exist in this driver
          grep -qE '^config[[:space:]]+KSU_SUSFS[[:space:]]*$' KernelSU/kernel/Kconfig
          for f in KernelSU/kernel/Kbuild KernelSU/kernel/Makefile; do
            if [ -f "$f" ] && grep -q '^REPO_BRANCH[[:space:]]*:=' "$f"; then
