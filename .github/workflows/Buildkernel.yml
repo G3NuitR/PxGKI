@@ -199,7 +199,8 @@ jobs:
          sed -i '/MODULES_ORDER=android\/gki_aarch64_modules/d' common/build.config.gki.aarch64
          sed -i '/KMI_SYMBOL_LIST_STRICT_MODE/d' common/build.config.gki.aarch64
          # Add WiFi modules (cfg80211, mac80211) to module_outs so Bazel copies them
-         sed -i '/module_outs = \[/a\        "net/wireless/cfg80211.ko",\n        "net/mac80211/mac80211.ko",' ./common/BUILD.bazel 2>/dev/null || true
+         sed -i '/module_outs = \[/a\        "net/wireless/cfg80211.ko",' ./common/BUILD.bazel
+         sed -i '/cfg80211\.ko/a\        "net/mac80211/mac80211.ko",' ./common/BUILD.bazel
          tools/bazel run --config=fast --lto=thin //common:kernel_aarch64_dist -- --destdir=dist
          
       - name: KPM patch
