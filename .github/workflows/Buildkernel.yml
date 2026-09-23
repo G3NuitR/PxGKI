@@ -139,8 +139,14 @@ jobs:
          echo "CONFIG_CFG80211=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_MAC80211=y" >> ./common/arch/arm64/configs/gki_defconfig
          # Remove modules from BUILD.bazel that are now built-in (=y produces no .ko)
-         sed -i '/"net\/rfkill\/rfkill\.ko"/d' ./common/BUILD.bazel
-         sed -i '/"lib\/crypto\/libarc4\.ko"/d' ./common/BUILD.bazel
+         echo "=== DEBUG: rfkill/libarc4 in BUILD.bazel BEFORE sed ==="
+         grep -n "rfkill\|libarc4" ./common/BUILD.bazel || echo "(not found in BUILD.bazel)"
+         sed -i '/rfkill\.ko/d' ./common/BUILD.bazel
+         sed -i '/libarc4\.ko/d' ./common/BUILD.bazel
+         echo "=== DEBUG: rfkill/libarc4 in BUILD.bazel AFTER sed ==="
+         grep -n "rfkill\|libarc4" ./common/BUILD.bazel || echo "(clean)"
+         echo "=== DEBUG: checking BUILD.bazel in build/ too ==="
+         grep -rn "rfkill\|libarc4" ./build/kernel/ 2>/dev/null | grep -i "module" | head -5 || echo "(not in build/)"
          # tmpfs
          echo "CONFIG_TMPFS_XATTR=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./common/arch/arm64/configs/gki_defconfig
