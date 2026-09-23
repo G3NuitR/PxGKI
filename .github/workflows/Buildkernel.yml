@@ -206,19 +206,12 @@ jobs:
          echo 'KMI_SYMBOL_LIST_ADD_ONLY=1' >> common/build.config.gki.aarch64
          # Patch BUILD.bazel to accept any built module
          python3 -c "
-import re
-with open('./common/BUILD.bazel', 'r') as f:
-    content = f.read()
-# Find the first module_outs list and append our modules before the closing bracket
-content = content.replace(
-    'module_outs = [',
-    'module_outs = [\n        \"net/wireless/cfg80211.ko\",\n        \"net/mac80211/mac80211.ko\",',
-    1
-)
-with open('./common/BUILD.bazel', 'w') as f:
-    f.write(content)
-print('Patched BUILD.bazel with WiFi modules')
-"
+         import re;
+         f=open('./common/BUILD.bazel','r'); c=f.read(); f.close();
+         c=c.replace('module_outs = [','module_outs = [\n        \"net/wireless/cfg80211.ko\",\n        \"net/mac80211/mac80211.ko\",',1);
+         f=open('./common/BUILD.bazel','w'); f.write(c); f.close();
+         print('Patched BUILD.bazel with WiFi modules')
+         "
          tools/bazel run --config=fast --lto=thin //common:kernel_aarch64_dist -- --destdir=dist
          
       - name: KPM patch
