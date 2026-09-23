@@ -138,6 +138,9 @@ jobs:
          sed -i 's/^CONFIG_RFKILL=m/CONFIG_RFKILL=y/' ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_CFG80211=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_MAC80211=y" >> ./common/arch/arm64/configs/gki_defconfig
+         # Remove modules from BUILD.bazel that are now built-in (=y produces no .ko)
+         sed -i '/"net\/rfkill\/rfkill\.ko"/d' ./common/BUILD.bazel
+         sed -i '/"lib\/crypto\/libarc4\.ko"/d' ./common/BUILD.bazel
          # tmpfs
          echo "CONFIG_TMPFS_XATTR=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./common/arch/arm64/configs/gki_defconfig
