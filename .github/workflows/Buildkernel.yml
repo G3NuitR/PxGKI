@@ -198,9 +198,27 @@ jobs:
          sed -i 's/BUILD_SYSTEM_DLKM=1/BUILD_SYSTEM_DLKM=0/' common/build.config.gki.aarch64
          sed -i '/MODULES_ORDER=android\/gki_aarch64_modules/d' common/build.config.gki.aarch64
          sed -i '/KMI_SYMBOL_LIST_STRICT_MODE/d' common/build.config.gki.aarch64
-         # Add WiFi modules (cfg80211, mac80211) to module_outs so Bazel copies them
-         sed -i '/module_outs = \[/a\        "net/wireless/cfg80211.ko",' ./common/BUILD.bazel
-         sed -i '/cfg80211\.ko/a\        "net/mac80211/mac80211.ko",' ./common/BUILD.bazel
+         # Allow extra modules (cfg80211, mac80211) built by CONFIG_CFG80211=y
+         # The GKI build system rejects modules not in module_outs. Rather than
+         # patching BUILD.bazel (fragile Starlark syntax), add them to the
+         # module_implicit_outs or suppress the check via build config.
+         echo 'TRIM_NONLISTED_KMI=""' >> common/build.config.gki.aarch64
+         echo 'KMI_SYMBOL_LIST_ADD_ONLY=1' >> common/build.config.gki.aarch64
+         # Patch BUILD.bazel to accept any built module
+         python3 -c "
+import re
+with open('./common/BUILD.bazel', 'r') as f:
+    content = f.read()
+# Find the first module_outs list and append our modules before the closing bracket
+content = content.replace(
+    'module_outs = [',
+    'module_outs = [\n        \"net/wireless/cfg80211.ko\",\n        \"net/mac80211/mac80211.ko\",',
+    1
+)
+with open('./common/BUILD.bazel', 'w') as f:
+    f.write(content)
+print('Patched BUILD.bazel with WiFi modules')
+"
          tools/bazel run --config=fast --lto=thin //common:kernel_aarch64_dist -- --destdir=dist
          
       - name: KPM patch
