@@ -132,14 +132,12 @@ jobs:
          echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> ./common/arch/arm64/configs/gki_defconfig
-         # wireless (required for WiFi on Pixel devices — bcmdhd4398 depends on cfg80211)
+         # wireless: build rfkill + cfg80211 + mac80211 as BUILT-IN (=y), not module (=m).
+         # Built-in avoids the module_outs check in the GKI Bazel build system.
+         # The vendor bcmdhd4398.ko driver loads against these built-in symbols.
+         sed -i 's/^CONFIG_RFKILL=m/CONFIG_RFKILL=y/' ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_CFG80211=y" >> ./common/arch/arm64/configs/gki_defconfig
-         echo "CONFIG_CFG80211_DEFAULT_PS=y" >> ./common/arch/arm64/configs/gki_defconfig
-         echo "CONFIG_CFG80211_CRDA_SUPPORT=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_MAC80211=y" >> ./common/arch/arm64/configs/gki_defconfig
-         echo "CONFIG_MAC80211_HAS_RC=y" >> ./common/arch/arm64/configs/gki_defconfig
-         echo "CONFIG_MAC80211_RC_MINSTREL=y" >> ./common/arch/arm64/configs/gki_defconfig
-         echo "CONFIG_MAC80211_RC_DEFAULT_MINSTREL=y" >> ./common/arch/arm64/configs/gki_defconfig
          # tmpfs
          echo "CONFIG_TMPFS_XATTR=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./common/arch/arm64/configs/gki_defconfig
@@ -198,13 +196,6 @@ jobs:
          sed -i 's/BUILD_SYSTEM_DLKM=1/BUILD_SYSTEM_DLKM=0/' common/build.config.gki.aarch64
          sed -i '/MODULES_ORDER=android\/gki_aarch64_modules/d' common/build.config.gki.aarch64
          sed -i '/KMI_SYMBOL_LIST_STRICT_MODE/d' common/build.config.gki.aarch64
-         # cfg80211 and mac80211 build as modules. The GKI build system rejects
-         # modules not listed in module_outs. Disable the check entirely by
-         # patching the kernel_build macro to skip the "not copied" error.
-         sed -i 's/fail("ERROR: The following kernel modules/print("WARNING: The following kernel modules/' ./build/kernel/kleaf/impl/kernel_build.bzl 2>/dev/null || true
-         sed -i 's/fail("ERROR: The following kernel modules/print("WARNING: The following kernel modules/' ./common/build/kernel/kleaf/impl/kernel_build.bzl 2>/dev/null || true
-         # Also try the direct approach: add to module_implicit_outs (not validated)
-         python3 -c 'import re;f=open("./common/BUILD.bazel");c=f.read();f.close();c=re.sub(r"(kernel_build\([^)]*module_outs\s*=\s*\[)",r"\1\n        \"net/wireless/cfg80211.ko\",\n        \"net/mac80211/mac80211.ko\",",c,count=1);f=open("./common/BUILD.bazel","w");f.write(c);f.close();print("Patched")'
          tools/bazel run --config=fast --lto=thin //common:kernel_aarch64_dist -- --destdir=dist
          
       - name: KPM patch
