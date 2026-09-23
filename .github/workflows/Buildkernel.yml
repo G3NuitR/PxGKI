@@ -6,7 +6,7 @@ on:
         description: "Kernel Android Release"
         required: true
         type: choice
-        default: '15'
+        default: '14'
         options:
            - '14'
            - '15'
@@ -14,26 +14,26 @@ on:
         description: "Kernel Version"
         required: true
         type: choice
-        default: '6.6'
+        default: '6.1'
         options:
            - '6.1'
            - '6.6'
       Security_Patch:
         description: "(Recommend same as stock kernel)  ㅤㅤㅤKernel Security Patch or lts (latest)"
         required: true
-        default: '2025-09'
+        default: 'lts'
       Kernel_Suffix:
         description: "(Recommend same as stock kernel)ㅤ‏‎‏‎‏‎‏‎ ㅤ‏‎‏‎‏‎‏‎ ㅤ‏‎‏‎‏‎‏‎ ㅤ‏‎‏‎‏‎‏‎ (Just delete the dirty suffix,fill in [no]) Kernel Suffix"
         required: false
-        default: 'g4b48560cd07d-ab14239520-4k'
+        default: 'gfa1d6308d1fe-ab14691759'
       Kernel_Time:
         description: "(Recommend same as stock kernel)  ㅤㅤㅤKernel Build Timestamp"
         required: true
-        default: 'Thu Oct  9 05:51:31 UTC 2025'
+        default: 'Thu Jan  1 00:00:00 UTC 1970'
       Enable_KPM_Feature:
         description: "Enable KPM Feature"
         required: false
-        default: false
+        default: true
         type: boolean
 
 
@@ -137,6 +137,14 @@ jobs:
          echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> ./common/arch/arm64/configs/gki_defconfig
+         # wireless (required for WiFi on Pixel devices — bcmdhd4398 depends on cfg80211)
+         echo "CONFIG_CFG80211=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_CFG80211_DEFAULT_PS=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_CFG80211_CRDA_SUPPORT=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_MAC80211=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_MAC80211_HAS_RC=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_MAC80211_RC_MINSTREL=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_MAC80211_RC_DEFAULT_MINSTREL=y" >> ./common/arch/arm64/configs/gki_defconfig
          # tmpfs
          echo "CONFIG_TMPFS_XATTR=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./common/arch/arm64/configs/gki_defconfig
