@@ -132,21 +132,15 @@ jobs:
          echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> ./common/arch/arm64/configs/gki_defconfig
-         # wireless: build rfkill + cfg80211 + mac80211 as BUILT-IN (=y), not module (=m).
-         # Built-in avoids the module_outs check in the GKI Bazel build system.
-         # The vendor bcmdhd4398.ko driver loads against these built-in symbols.
+         # wireless: build rfkill + cfg80211 as built-in so vendor bcmdhd4398.ko can load.
+         # Both must be =y to avoid producing .ko files (which break the GKI module list).
          sed -i 's/^CONFIG_RFKILL=m/CONFIG_RFKILL=y/' ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_CFG80211=y" >> ./common/arch/arm64/configs/gki_defconfig
-         echo "CONFIG_MAC80211=y" >> ./common/arch/arm64/configs/gki_defconfig
-         # Remove modules from BUILD.bazel that are now built-in (=y produces no .ko)
-         echo "=== DEBUG: rfkill/libarc4 in BUILD.bazel BEFORE sed ==="
-         grep -n "rfkill\|libarc4" ./common/BUILD.bazel || echo "(not found in BUILD.bazel)"
-         sed -i '/rfkill\.ko/d' ./common/BUILD.bazel
-         sed -i '/libarc4\.ko/d' ./common/BUILD.bazel
-         echo "=== DEBUG: rfkill/libarc4 in BUILD.bazel AFTER sed ==="
-         grep -n "rfkill\|libarc4" ./common/BUILD.bazel || echo "(clean)"
-         echo "=== DEBUG: checking BUILD.bazel in build/ too ==="
-         grep -rn "rfkill\|libarc4" ./build/kernel/ 2>/dev/null | grep -i "module" | head -5 || echo "(not in build/)"
+         # Remove rfkill.ko and libarc4.ko from the system_dlkm module list (now built-in)
+         find ./common/android -name "gki_system_dlkm_modules" -exec sed -i '/rfkill\.ko/d' {} \;
+         find ./common/android -name "gki_system_dlkm_modules" -exec sed -i '/libarc4\.ko/d' {} \;
+         find ./common -name "gki_aarch64_modules" -exec sed -i '/rfkill\.ko/d' {} \;
+         find ./common -name "gki_aarch64_modules" -exec sed -i '/libarc4\.ko/d' {} \;
          # tmpfs
          echo "CONFIG_TMPFS_XATTR=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./common/arch/arm64/configs/gki_defconfig
