@@ -132,15 +132,10 @@ jobs:
          echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> ./common/arch/arm64/configs/gki_defconfig
-         # wireless: build rfkill + cfg80211 as built-in so vendor bcmdhd4398.ko can load.
-         # Both must be =y to avoid producing .ko files (which break the GKI module list).
-         sed -i 's/^CONFIG_RFKILL=m/CONFIG_RFKILL=y/' ./common/arch/arm64/configs/gki_defconfig
-         echo "CONFIG_CFG80211=y" >> ./common/arch/arm64/configs/gki_defconfig
-         # Remove rfkill.ko and libarc4.ko from the system_dlkm module list (now built-in)
-         find ./common/android -name "gki_system_dlkm_modules" -exec sed -i '/rfkill\.ko/d' {} \;
-         find ./common/android -name "gki_system_dlkm_modules" -exec sed -i '/libarc4\.ko/d' {} \;
-         find ./common -name "gki_aarch64_modules" -exec sed -i '/rfkill\.ko/d' {} \;
-         find ./common -name "gki_aarch64_modules" -exec sed -i '/libarc4\.ko/d' {} \;
+         # WiFi (cfg80211) is NOT enabled here — the GKI Bazel build system makes it
+         # impractical to change module/builtin status of rfkill (its dependency).
+         # WiFi is handled at runtime by using mobile data during hooking sessions,
+         # or by building a separate kernel with a custom Bazel config.
          # tmpfs
          echo "CONFIG_TMPFS_XATTR=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./common/arch/arm64/configs/gki_defconfig
