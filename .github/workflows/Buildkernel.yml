@@ -29,7 +29,7 @@ on:
       Kernel_Time:
         description: "(Recommend same as stock kernel)  ㅤㅤㅤKernel Build Timestamp"
         required: true
-        default: 'Thu Jan  1 00:00:00 UTC 1970'
+        default: 'Fri Jan  9 16:33:46 UTC 2026'
       Enable_KPM_Feature:
         description: "Enable KPM Feature"
         required: false
@@ -61,8 +61,8 @@ jobs:
         run: |
          mkdir Buildkernel
          cd Buildkernel
-         git config --global user.email "usererror404@gmail.com"
-         git config --global user.name "usererror404"
+         git config --global user.email "build-user@build-host"
+         git config --global user.name "build-user"
          repo init -u https://android.googlesource.com/kernel/manifest -b common-android${{ github.event.inputs.Android_Release }}-${{ github.event.inputs.Kernel_Version }}-${{ github.event.inputs.Security_Patch }} --depth=1
          repo sync
 
