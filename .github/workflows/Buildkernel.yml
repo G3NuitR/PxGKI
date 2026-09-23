@@ -204,14 +204,8 @@ jobs:
          # module_implicit_outs or suppress the check via build config.
          echo 'TRIM_NONLISTED_KMI=""' >> common/build.config.gki.aarch64
          echo 'KMI_SYMBOL_LIST_ADD_ONLY=1' >> common/build.config.gki.aarch64
-         # Patch BUILD.bazel to accept any built module
-         python3 -c "
-         import re;
-         f=open('./common/BUILD.bazel','r'); c=f.read(); f.close();
-         c=c.replace('module_outs = [','module_outs = [\n        \"net/wireless/cfg80211.ko\",\n        \"net/mac80211/mac80211.ko\",',1);
-         f=open('./common/BUILD.bazel','w'); f.write(c); f.close();
-         print('Patched BUILD.bazel with WiFi modules')
-         "
+         # Patch BUILD.bazel to add WiFi modules to module_outs
+         python3 -c 'f=open("./common/BUILD.bazel","r");c=f.read();f.close();c=c.replace("module_outs = [","module_outs = [\n        \"net/wireless/cfg80211.ko\",\n        \"net/mac80211/mac80211.ko\",",1);f=open("./common/BUILD.bazel","w");f.write(c);f.close();print("Patched BUILD.bazel")'
          tools/bazel run --config=fast --lto=thin //common:kernel_aarch64_dist -- --destdir=dist
          
       - name: KPM patch
